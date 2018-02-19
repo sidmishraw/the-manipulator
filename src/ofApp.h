@@ -2,8 +2,15 @@
 
 #include "ofMain.h"
 
+#include "Canvas.hpp"
+
 class ofApp : public ofBaseApp{
 
+  /**
+   * The canvas
+   */
+  Manipulator::Canvas canvas;
+  
 	public:
 		void setup();
 		void update();

@@ -2,17 +2,16 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
+  ofSetBackgroundColor(0, 0, 0); // set the background to black!
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+  this->canvas.render(); // render the canvas
 }
 
 //--------------------------------------------------------------
@@ -32,7 +31,7 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+  
 }
 
 //--------------------------------------------------------------
@@ -67,5 +66,7 @@ void ofApp::gotMessage(ofMessage msg){
 
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
+  std::for_each(dragInfo.files.begin(), dragInfo.files.end(), [this](string filePath){
+    this->canvas.addPicture(filePath);
+  });
 }
