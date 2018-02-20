@@ -1,6 +1,4 @@
 #include "ofApp.h"
-#include <string>
-#include <regex>
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -36,13 +34,8 @@ void ofApp::keyReleased(int key){
     switch(key) {
             
         case 's': {
-            
             if (!this->metaActionInProgress) return; // META ACTION NOT IN PROGRESS
-            
-            auto currTime = std::time(nullptr);
-            std::string fileName = "temp-img_";
-            fileName = std::regex_replace(fileName.append(std::asctime(std::localtime(&currTime))), std::regex("\\s"), "_");
-            this->canvas.saveToDisk(fileName);
+            this->canvas.saveToDisk(std::string("temp-img_"));
         }
             
         case OF_KEY_COMMAND:

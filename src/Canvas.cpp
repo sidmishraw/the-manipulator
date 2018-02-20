@@ -7,6 +7,8 @@
 
 #include "Canvas.hpp"
 #include "ofMain.h"
+#include <string>
+#include <regex>
 
 
 bool Manipulator::Canvas::addPicture(std::string filePath) {
@@ -28,6 +30,8 @@ void Manipulator::Canvas::render() {
 
 bool Manipulator::Canvas::saveToDisk(std::string fileName) {
     try {
+        auto currTime = std::time(nullptr);
+        fileName = std::regex_replace(fileName.append(std::asctime(std::localtime(&currTime))), std::regex("\\s"), "_");
         ofSaveScreen(fileName + ".png");
         return true;
     } catch(...) {
