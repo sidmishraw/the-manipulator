@@ -6,9 +6,10 @@
 //
 
 #include "Canvas.hpp"
+#include "ofMain.h"
 
 
-bool Manipulator::Canvas::addPicture(string filePath) {
+bool Manipulator::Canvas::addPicture(std::string filePath) {
     auto pic = Picture(filePath);
     if(pic.load()) {
         this->pictures.push_back(pic);
@@ -24,4 +25,14 @@ void Manipulator::Canvas::render() {
                       pic.render();
                   });
 }
+
+bool Manipulator::Canvas::saveToDisk(std::string fileName) {
+    try {
+        ofSaveScreen(fileName + ".png");
+        return true;
+    } catch(...) {
+        return false;
+    }
+}
+
 

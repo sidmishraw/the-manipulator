@@ -14,14 +14,6 @@
 namespace Manipulator {
     
     /**
-     * The commands for Canvas.
-     */
-    enum Command {
-        CYCLE_IMG_UP,
-        CYCLE_IMG_DOWN
-    };
-    
-    /**
      * The canvas where the pictures are drawn.
      */
     class Canvas {
@@ -36,7 +28,7 @@ namespace Manipulator {
         /**
          * Adds the picture at the filePath to the canvas, if not added returns false.
          */
-        bool addPicture(string filePath);
+        bool addPicture(std::string filePath);
         
         /**
          * Renders the canvas, drawing the pictures, one at a time in the order they were added to it.
@@ -44,9 +36,9 @@ namespace Manipulator {
         void render();
         
         /**
-         * Processes the command, effectively making Canvas the command processor.
+         * Saves the canvas composition to disk with the provided fileName.
          */
-        bool commandProcessor(Command command);
+        bool saveToDisk(std::string fileName);
     };
 }
 

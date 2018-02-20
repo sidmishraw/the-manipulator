@@ -33,6 +33,9 @@ namespace Manipulator {
         
     public:
         
+        /**
+         * Makes a new picture with the image located at the filePath on disk.
+         */
         Picture(string filePath);
         
         /**

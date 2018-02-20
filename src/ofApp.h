@@ -11,6 +11,11 @@ class ofApp : public ofBaseApp{
      */
     Manipulator::Canvas canvas;
     
+    /**
+     * A command or control action is in progress.
+     */
+    bool metaActionInProgress;
+    
 public:
     void setup();
     void update();

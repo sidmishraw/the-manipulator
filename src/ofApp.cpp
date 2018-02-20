@@ -1,7 +1,10 @@
 #include "ofApp.h"
+#include <string>
+#include <regex>
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    this->metaActionInProgress = false;
     ofSetBackgroundColor(0, 0, 0); // set the background to black!
 }
 
@@ -17,11 +20,38 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     
+    switch(key) {
+            
+        case OF_KEY_COMMAND:
+        case OF_KEY_CONTROL:{
+            this->metaActionInProgress = true;
+            break;
+        }
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
     
+    switch(key) {
+            
+        case 's': {
+            
+            if (!this->metaActionInProgress) return; // META ACTION NOT IN PROGRESS
+            
+            auto currTime = std::time(nullptr);
+            std::string fileName = "temp-img_";
+            fileName = std::regex_replace(fileName.append(std::asctime(std::localtime(&currTime))), std::regex("\\s"), "_");
+            this->canvas.saveToDisk(fileName);
+        }
+            
+        case OF_KEY_COMMAND:
+        case OF_KEY_CONTROL:{
+            // Command on Mac and Ctrl on windows enable meta actions :D
+            this->metaActionInProgress = false;
+            return;
+        }
+    }
 }
 
 //--------------------------------------------------------------
@@ -66,7 +96,10 @@ void ofApp::gotMessage(ofMessage msg){
 
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
-    std::for_each(dragInfo.files.begin(), dragInfo.files.end(), [this](string filePath){
-        this->canvas.addPicture(filePath);
-    });
+    
+    std::for_each(dragInfo.files.begin(),
+                  dragInfo.files.end(),
+                  [this](std::string filePath){
+                      this->canvas.addPicture(filePath);
+                  });
 }
