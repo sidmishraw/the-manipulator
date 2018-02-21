@@ -14,7 +14,7 @@
 
 namespace Manipulator {
     
-    class Picture :protected ObedientObj{
+    class Picture :public ObedientObj{
         
         /**
          * The path of the image.
@@ -44,14 +44,32 @@ namespace Manipulator {
         void render();
         
         /**
-         * True if the picture was selected, else false.
+         * Attempts to load the image from the disk.
+         */
+        bool load();
+        
+        // checks if the point is inside the image.
+        bool containsPoint(int x, int y);
+        
+        /**
+         * Checks if the Picture is selected.
          */
         bool isSelected();
         
         /**
-         * Attempts to load the image from the disk.
+         * Draws the border of the picture.
          */
-        bool load();
+        void drawBorder();
+        
+        /**
+         * Hides the border of the Picture when it is no longer selected.
+         */
+        void removeBorder();
+        
+        /**
+         * Translates the Picture -- 2D.
+         */
+        void translate(float tx, float ty);
     };
     
 }

@@ -16,6 +16,15 @@ class ofApp : public ofBaseApp{
      */
     bool metaActionInProgress;
     
+    /**
+     * A flag indicating that a mouse drag is in progress. For protection against accidental clicks :D
+     */
+    bool dragInProgress;
+    
+    /**
+     * The exact point where the mouse button was pressed to start the drag.
+     */
+    ofPoint theDragStarterPt;
 public:
     void setup();
     void update();

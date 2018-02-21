@@ -19,7 +19,7 @@ namespace Manipulator {
      */
     class ObedientObj {
         
-    protected:
+    public:
         
         /**
          *  2D translation matrix.
@@ -39,7 +39,7 @@ namespace Manipulator {
         /**
          * flag true when the object is selected.
          */
-        bool isSelected;
+        bool selected;
     };
     
 }
