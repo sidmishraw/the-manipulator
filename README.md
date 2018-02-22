@@ -18,7 +18,9 @@ Author: [Sidharth Mishra](mailto:sidmishraw@gmail.com)
 
 * Cmd + S (on MacOSx) and Ctrl + S (on Windows/Linux) save the image to an image file on the disk.
 
-![](./resources/demo_1.gif)
+![A quick demo!](./resources/demo_1.gif)
+![Screenshot#1 saved collage](./resources/temp-img_Wed_Feb_21_15:11:55_2018_.png)
+![Screenshot#2 saved collage](./resources/temp-img_Wed_Feb_21_15:38:38_2018_.png)
 
 ## Changelog
 
