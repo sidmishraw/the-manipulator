@@ -10,6 +10,7 @@
 		363EC843203A7B900027B21C /* Canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 363EC841203A7B900027B21C /* Canvas.cpp */; };
 		363EC846203A7BF80027B21C /* Picture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 363EC844203A7BF80027B21C /* Picture.cpp */; };
 		363EC849203A7C540027B21C /* ObedientObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 363EC847203A7C540027B21C /* ObedientObj.cpp */; };
+		36EC0A932041F930005D35EB /* Tmnper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36EC0A922041F930005D35EB /* Tmnper.cpp */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1D0A3A1BDC003C02F2 /* main.cpp */; };
 		E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4B69E1E0A3A1BDC003C02F2 /* ofApp.cpp */; };
@@ -51,6 +52,8 @@
 		363EC845203A7BF80027B21C /* Picture.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Picture.hpp; sourceTree = "<group>"; };
 		363EC847203A7C540027B21C /* ObedientObj.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ObedientObj.cpp; sourceTree = "<group>"; };
 		363EC848203A7C540027B21C /* ObedientObj.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ObedientObj.hpp; sourceTree = "<group>"; };
+		36EC0A912041F92F005D35EB /* Tmnper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Tmnper.hpp; sourceTree = "<group>"; };
+		36EC0A922041F930005D35EB /* Tmnper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Tmnper.cpp; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = "../../../Downloads/open-frameworks-ui-framework-c++/of_v0.9.8_osx_release/libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj"; sourceTree = SOURCE_ROOT; };
 		E4B69B5B0A3A1756003C02F2 /* the-manipulatorDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "the-manipulatorDebug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
@@ -111,6 +114,8 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				36EC0A922041F930005D35EB /* Tmnper.cpp */,
+				36EC0A912041F92F005D35EB /* Tmnper.hpp */,
 				363EC841203A7B900027B21C /* Canvas.cpp */,
 				363EC842203A7B900027B21C /* Canvas.hpp */,
 				363EC844203A7BF80027B21C /* Picture.cpp */,
@@ -223,6 +228,7 @@
 				363EC849203A7C540027B21C /* ObedientObj.cpp in Sources */,
 				363EC846203A7BF80027B21C /* Picture.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
+				36EC0A932041F930005D35EB /* Tmnper.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
 				363EC843203A7B900027B21C /* Canvas.cpp in Sources */,
 			);

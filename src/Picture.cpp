@@ -6,6 +6,7 @@
 //
 
 #include "Picture.hpp"
+#include <sstream>
 
 Manipulator::Picture::Picture(string filePath):Manipulator::ObedientObj() {
     this->imagePath = filePath;
@@ -65,6 +66,43 @@ void Manipulator::Picture::translate(float tx, float ty) {
     this->tMatrix = this->tMatrix + ofVec2f(tx, ty);
 }
 
+/* ---------------------------------------------------------------------------*/
+using namespace std;
+void Manipulator::Picture::fromString(string contents) {
+    istringstream ss (contents);
+    
+    ss >> this->imagePath; // get the image path
+    
+    string tx, ty;
+    ss >> tx; // get trans Matrix x
+    ss >> ty; // get trans Matrix y
+    this->tMatrix.set(stof(tx), stof(ty));
+    
+    string sx, sy;
+    ss >> sx; // get scale matrix x
+    ss >> sy; // get scale matrix y
+    this->sMatrix.set(stof(sx), stof(sy));
+    
+    string theta;
+    ss >> theta; // rotation angle
+    this->theta = stof(theta);
+}
+
+using namespace std;
+string Manipulator::Picture::toString() { 
+    string contents;
+    
+    contents += this->imagePath + string("\n");
+    contents += to_string(this->tMatrix.x) + string("\n");
+    contents += to_string(this->tMatrix.y) + string("\n");
+    contents += to_string(this->sMatrix.x) + string("\n");
+    contents += to_string(this->sMatrix.y) + string("\n");
+    contents += to_string(this->theta) + string("\n");
+    
+    
+    return contents;
+}
+/* ---------------------------------------------------------------------------*/
 
 
 
