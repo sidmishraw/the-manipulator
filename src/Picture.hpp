@@ -14,6 +14,7 @@
 
 namespace Manipulator {
     
+    using namespace std;
     class Picture :public ObedientObj{
         
         /**
@@ -77,13 +78,11 @@ namespace Manipulator {
          * Serializes the Picture into a string with only the features that matter.
          * imagePath, translation vector, scale vector, and rotation angle.
          */
-        using namespace std;
         string toString();
         
         /**
          * Deserializes the Picture setting this picture object to its saved state.
          */
-        using namespace std;
         void fromString(string contents);
         /* -------------------------- SERIALIZATION ------------------------- */
     };

@@ -149,6 +149,18 @@ void Manipulator::Canvas::translatePicture(float tx, float ty) {
     this->foregroundPic->translate(tx, ty); // translate the picture -- delegated to the foreground picture!
 }
 
+/* ------------------------------------------------------------ */
+using namespace std;
+string Manipulator::Canvas::toString() {
+    return string("");
+}
+
+using namespace std;
+void Manipulator::Canvas::fromString(string contents) {
+}
+/* ------------------------------------------------------------ */
+
+
 
 
 

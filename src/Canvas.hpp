@@ -17,6 +17,7 @@ namespace Manipulator {
     /**
      * The canvas where the pictures are drawn.
      */
+    using namespace std;
     class Canvas {
         
         /**
@@ -97,13 +98,11 @@ namespace Manipulator {
         /**
          * Serializes the contents of the Canvas into a string to be saved onto disk.
          */
-        using namespace std;
         string toString();
         
         /**
          * De-serializes the contents of the string restoring the canvas.
          */
-        using namespace std;
         void fromString(string contents);
         /* ------------------------------------------------------------ */
     };
