@@ -7,6 +7,7 @@
 //
 
 #include "Tmnper.hpp"
+#include "ofMain.h"
 
 /**
  * Saves the contents into a `.tmpr` file.
@@ -15,6 +16,11 @@ using namespace std;
 bool Tmnper::saveIntoTmpr(string fileName, string contents) {
     
     if(fileName.length() == 0 || !regex_match(fileName, regex(".*\\.tmpr"))) return false;
+    
+    /* ------- Using openframework's filesystem utility -- wrapped over Boost ---  */
+    ofFilePath::createEnclosingDirectory(fileName); // create a dir
+    fileName = ofToDataPath(fileName); // get the path to the enclosed dir -- prolly inside ../bin/data
+    /* ------- Using openframework's filesystem utility -- wrapped over Boost ---  */
     
     ofstream out;
     

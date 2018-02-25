@@ -11,7 +11,7 @@
 #include <string>
 #include <regex>
 #include <memory>
-
+#include <sstream>
 
 
 Manipulator::Canvas::Canvas() {
@@ -43,7 +43,7 @@ void Manipulator::Canvas::render() {
                   });
 }
 
-bool Manipulator::Canvas::saveToDisk(std::string fileName) {
+bool Manipulator::Canvas::saveCompositionToDisk(std::string fileName) {
     try {
         auto currTime = std::time(nullptr);
         fileName = std::regex_replace(
@@ -152,12 +152,86 @@ void Manipulator::Canvas::translatePicture(float tx, float ty) {
 /* ------------------------------------------------------------ */
 using namespace std;
 string Manipulator::Canvas::toString() {
-    return string("");
+    string contents;
+    
+    /* ------------------------------- */
+    for_each(this->pictures.rbegin(),
+             this->pictures.rend(),
+             [this, &contents](std::pair<int, std::shared_ptr<Manipulator::Picture>> entry) {
+                 contents += string("###\n") + entry.second->toString();
+             });
+    /* ------------------------------- */
+    
+    return contents;
 }
 
 using namespace std;
 void Manipulator::Canvas::fromString(string contents) {
+    
+    /* ------ reset the currentDepth and selectionDepth ------- */
+    this->currentDepth = 1;
+    this->selectionDepth = 1;
+    /* ------ reset the currentDepth and selectionDepth ------- */
+    
+    /* ------ clear the pictures map ------- */
+    this->pictures.clear();
+    /* ------ clear the pictures map ------- */
+    
+    istringstream cstream(contents); // the contents stream
+    
+    string tmp; // for reading into
+    string savedContents; // string buffer
+    
+    shared_ptr<Manipulator::Picture> tmpPicture; // pointer to a temporary picture being created
+    
+    /* --------------------------sstream reader------------------------------------- */
+    while(cstream >> tmp) {
+        /*--------------------------------------------------------------------*/
+        if(tmp == "###") {
+            /* --------- saved contents ----------------- */
+            if(savedContents != "") {
+                
+                this->currentDepth --;
+                this->pictures[this->currentDepth] = Manipulator::restore_picture(savedContents);
+                savedContents = string(""); // reset the saved contents since it is the
+                                            // beginning of a new picture's saved data
+            }
+            /* --------- saved contents ----------------- */
+        } else {
+            savedContents += tmp + string("\n"); // restoring the \n that is eaten by the stream
+        }
+        /*--------------------------------------------------------------------*/
+    }
+    if(savedContents != "") {
+        // last remaining picture
+        this->currentDepth --;
+        this->pictures[this->currentDepth] = Manipulator::restore_picture(savedContents);
+        savedContents = string(""); // reset the saved contents since it is the
+                                    // beginning of a new picture's saved data
+    }
+    /* ---------------------------------sstream reader----------------------------- */
+    
 }
+
+bool Manipulator::Canvas::saveStateToDisk(std::string fileName) {
+    try {
+        auto currTime = std::time(nullptr);
+        fileName = std::regex_replace(
+                                      fileName.append(std::asctime(std::localtime(&currTime))),
+                                      std::regex("\\s"),
+                                      "_");
+        Tmnper::saveIntoTmpr(fileName + ".tmpr", this->toString()); // save state to disk
+        return true;
+    } catch(...) {
+        return false;
+    }
+}
+
+void Manipulator::Canvas::loadStateFromDisk(std::string fileName) {
+    this->fromString(Tmnper::loadFromTmpr(fileName));
+}
+
+
 /* ------------------------------------------------------------ */
 
 

@@ -11,6 +11,7 @@
 #include <memory>
 #include <map>
 #include "Picture.hpp"
+#include "Tmnper.hpp"
 
 namespace Manipulator {
     
@@ -56,7 +57,7 @@ namespace Manipulator {
         /**
          * Saves the canvas composition to disk with the provided fileName.
          */
-        bool saveToDisk(std::string fileName);
+        bool saveCompositionToDisk(std::string fileName);
         
         /**
          * Scales/resizes the current - selected picture or the picture on the foreground.
@@ -94,6 +95,16 @@ namespace Manipulator {
         void cyclePicturesDown();
         
         /* ------------------------------------------------------------ */
+        
+        /**
+         * Saves the canvas state to disk with the provided fileName.
+         */
+        bool saveStateToDisk(std::string fileName);
+        
+        /**
+         * Loads the canvas state from the disk.
+         */
+        void loadStateFromDisk(std::string fileName);
         
         /**
          * Serializes the contents of the Canvas into a string to be saved onto disk.

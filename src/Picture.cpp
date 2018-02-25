@@ -105,6 +105,29 @@ string Manipulator::Picture::toString() {
 /* ---------------------------------------------------------------------------*/
 
 
+/**
+ * Makes a new Picture with the saved state.
+ */
+using namespace std;
+shared_ptr<Manipulator::Picture> Manipulator::restore_picture(string savedContents) {
+    istringstream ss (savedContents);
+    
+    string imagePath;
+    ss >> imagePath; // get the image path
+    
+    auto picture = make_shared<Manipulator::Picture>(imagePath);
+    
+    /* -------- attempt to load the picture -------- */
+    if(picture->load()) {
+        picture->fromString(savedContents);
+        return picture;
+    }
+    /* -------- attempt to load the picture -------- */
+    
+    picture.reset(); // nullptr
+    return picture;
+}
+
 
 
 

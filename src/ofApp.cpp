@@ -1,4 +1,7 @@
 #include "ofApp.h"
+#include <regex>
+#include <string>
+#include <sstream>
 
 //--------------------------------------------------------------
 void ofApp::setup(){
@@ -29,6 +32,7 @@ void ofApp::keyPressed(int key){
 }
 
 //--------------------------------------------------------------
+using namespace std;
 void ofApp::keyReleased(int key){
     
     switch(key) {
@@ -45,7 +49,8 @@ void ofApp::keyReleased(int key){
             
         case 's': {
             if (!this->metaActionInProgress) return; // META ACTION NOT IN PROGRESS
-            this->canvas.saveToDisk(std::string("temp-img_"));
+            this->canvas.saveCompositionToDisk(std::string("temp-img_")); // save canvas image composition
+            this->canvas.saveStateToDisk(std::string("canvas-saved-state_")); // save canvas state
         }
             
         case OF_KEY_COMMAND:
@@ -76,16 +81,17 @@ void ofApp::mouseMoved(int x, int y ){
 void ofApp::mouseDragged(int x, int y, int button){
     this->dragInProgress = true;
     
-    //# ===========================================
+    /* ---------------------------------------------- */
     auto currentPoint = ofPoint(x, y);
     auto delta = currentPoint - this->theDragStarterPt;
     
-    //# =============== translate the selected image on canvas ======
+    /* ---------------translate the selected image on canvas --------------- */
     this->canvas.translatePicture(delta.x, delta.y);
-    //# =============== translate the selected image on canvas ======
-
-    this->theDragStarterPt = currentPoint; // updating the dragStarter point to the current position -- for the next motion segment!
-    //# ===========================================
+    /* ---------------translate the selected image on canvas --------------- */
+    
+    this->theDragStarterPt = currentPoint; // updating the dragStarter point
+                                           // to the current position -- for the next motion segment!
+    /* ---------------------------------------------- */
 }
 
 //--------------------------------------------------------------
@@ -127,6 +133,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
     std::for_each(dragInfo.files.begin(),
                   dragInfo.files.end(),
                   [this](std::string filePath){
-                      this->canvas.addPicture(filePath);
+                      if(filePath.length() == 0 || !regex_match(filePath, regex(".*\\.tmpr"))) this->canvas.addPicture(filePath); // a picture or image
+                      else this->canvas.loadStateFromDisk(filePath); // it is a saved file
                   });
 }

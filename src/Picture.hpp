@@ -12,6 +12,8 @@
 #include "ObedientObj.hpp"
 #include "ofMain.h"
 
+#include <memory>
+
 namespace Manipulator {
     
     using namespace std;
@@ -87,5 +89,10 @@ namespace Manipulator {
         /* -------------------------- SERIALIZATION ------------------------- */
     };
     
+    /**
+     * Makes a new Picture with the saved state.
+     */
+    using namespace std;
+    shared_ptr<Manipulator::Picture> restore_picture(string savedContents);
 }
 #endif /* Picture_hpp */
