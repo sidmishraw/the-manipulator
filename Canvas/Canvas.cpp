@@ -19,10 +19,10 @@ Manipulator::Canvas::Canvas() {
     this->selectionDepth = 1; // start the depth at 0 and it is always going to decrease
 }
 
-bool Manipulator::Canvas::addPicture(std::string filePath) {
+bool Manipulator::Canvas::addPicture(std::string filePath, float tx, float ty) {
     //# ================================================
     
-    auto pic = std::make_shared<Manipulator::Picture>(filePath); // the shared pointer for ARC -- :D
+    auto pic = std::make_shared<Manipulator::Picture>(filePath, tx, ty); // the shared pointer for ARC -- :D
     
     //# ================================================
     if(pic->load()) {

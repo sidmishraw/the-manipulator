@@ -11,13 +11,15 @@
 
 #include "ObedientObj.hpp"
 #include "ofMain.h"
+#include "PManipulator.hpp"
 
 #include <memory>
 
 namespace Manipulator {
     
     using namespace std;
-    class Picture :public ObedientObj{
+    using namespace Manipulator;
+    class Picture : public ObedientObj {
         
         /**
          * The path of the image.
@@ -31,15 +33,16 @@ namespace Manipulator {
         
         /**
          * The border of the picture when it is selected.
+         The manipulator for this picture
          */
-        ofRectangle border;
+        shared_ptr<PManipulator> manipulator;
         
     public:
         
         /**
          * Makes a new picture with the image located at the filePath on disk.
          */
-        Picture(string filePath);
+        Picture(string filePath, float tx, float ty);
         
         /**
          * Draws the picture on the canvas.
@@ -73,6 +76,24 @@ namespace Manipulator {
          * Translates the Picture -- 2D.
          */
         void translate(float tx, float ty);
+        
+        /**
+         * Scales the picture -- 2D
+         */
+        void scale(float sx, float sy);
+        
+        /**
+         * Rotates the picture keeping the pivot at the center of the bordering
+         * rectangle.
+         * theta is angle of rotation in degrees.
+         */
+        void rotate(float theta);
+        
+        /**
+         * Resets the picture to its initial state, bringing it to its
+         * initial location, scaling, and rotation.
+         */
+        void reset();
         
         /* -------------------------- SERIALIZATION ------------------------- */
         

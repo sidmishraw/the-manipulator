@@ -132,8 +132,26 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
     std::for_each(dragInfo.files.begin(),
                   dragInfo.files.end(),
-                  [this](std::string filePath){
-                      if(filePath.length() == 0 || !regex_match(filePath, regex(".*\\.tmpr"))) this->canvas.addPicture(filePath); // a picture or image
-                      else this->canvas.loadStateFromDisk(filePath); // it is a saved file
-                  });
+                  //
+                  // -----------------------------------------
+                  [this, &dragInfo](std::string filePath) {
+                      
+                      if(filePath.length() == 0
+                         || !regex_match(filePath, regex(".*\\.tmpr")))  {
+                          
+                           // process the dropped image file
+                          this->canvas.addPicture(filePath,
+                                                  dragInfo.position.x,
+                                                  dragInfo.position.y);
+                          
+                      } else {
+                          
+                          // restore from the dropped saved file
+                          this->canvas.loadStateFromDisk(filePath);
+                          
+                      }
+                  }
+                  // -----------------------------------------
+                  //
+    );
 }

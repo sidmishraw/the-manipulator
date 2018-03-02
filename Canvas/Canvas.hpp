@@ -47,7 +47,7 @@ namespace Manipulator {
         /**
          * Adds the picture at the filePath to the canvas, if not added returns false.
          */
-        bool addPicture(std::string filePath);
+        bool addPicture(std::string filePath, float tx, float ty);
         
         /**
          * Renders the canvas, drawing the pictures, one at a time in the order they were added to it.
@@ -93,6 +93,11 @@ namespace Manipulator {
          * Moves the selected image down in the z. (+ve)
          */
         void cyclePicturesDown();
+        
+        /**
+         * Deletes the selected picture from the canvas.
+         */
+        void deletePicture();
         
         /* ------------------------------------------------------------ */
         
