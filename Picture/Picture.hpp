@@ -17,103 +17,132 @@
 
 namespace Manipulator {
     
+    //
+    // PICTURE
+    // -------------
+    // A picture on the Canvas. This picture is intelligent and allows itself to
+    // be manipulated by the user!
+    //
     using namespace std;
     using namespace Manipulator;
     class Picture : public ObedientObj {
         
-        /**
-         * The path of the image.
-         */
+        //
+        // The path of the image.
+        //
         string imagePath;
         
-        /**
-         * The contents of the picture.
-         */
+        //
+        //The contents of the picture.
+        //
         ofImage contents;
         
-        /**
-         * The border of the picture when it is selected.
-         The manipulator for this picture
-         */
+        //
+        // The border of the picture when it is selected.
+        // The manipulator for this picture
+        //
         shared_ptr<PManipulator> manipulator;
+        
+        //
+        // Store the rendering matrix with all its transformations in
+        // order to check mouse pointer locations.
+        //
+        ofMatrix4x4 renderMat;
+        
+        //
+        // Applies the transformations to the renderMat
+        //
+        void transform();
+        
+        //
+        // flag signifying if the pass is for selection
+        //
+        bool isSelectionRenderPass;
         
     public:
         
-        /**
-         * Makes a new picture with the image located at the filePath on disk.
-         */
+        //
+        // get isSelectionRenderPass flag
+        //
+        bool getIsSelectionRenderPass() {
+            
+            return this->isSelectionRenderPass;
+        }
+        
+        //
+        // set isSelectionRenderPass flag
+        //
+        void setIsSelectionRenderPass(bool f) {
+            
+            this->isSelectionRenderPass = f;
+        }
+        
+        //
+        // Makes a new picture with the image located at the filePath on disk.
+        //
         Picture(string filePath, float tx, float ty);
         
-        /**
-         * Draws the picture on the canvas.
-         */
+        //
+        // Draws the picture on the canvas.
+        //
         void render();
         
-        /**
-         * Attempts to load the image from the disk.
-         */
+        //
+        // Attempts to load the image from the disk.
+        //
         bool load();
         
-        // checks if the point is inside the image.
-        bool containsPoint(int x, int y);
+        //
+        // Checks if the point is inside the image.
+        //
+        bool containsPoint(float x, float y);
         
-        /**
-         * Checks if the Picture is selected.
-         */
+        //
+        // Checks if the Picture is selected.
+        //
         bool isSelected();
         
-        /**
-         * Draws the border of the picture.
-         */
+        //
+        // Draws the border of the picture.
+        //
         void drawBorder();
         
-        /**
-         * Hides the border of the Picture when it is no longer selected.
-         */
+        //
+        // Hides the border of the Picture when it is no longer selected.
+        //
         void removeBorder();
         
-        /**
-         * Translates the Picture -- 2D.
-         */
-        void translate(float tx, float ty);
+        //
+        // Processes the delta, manipulating itself depending on the mode of
+        // the manipulator!
+        //
+        void processDelta(ofVec2f &delta);
         
-        /**
-         * Scales the picture -- 2D
-         */
-        void scale(float sx, float sy);
-        
-        /**
-         * Rotates the picture keeping the pivot at the center of the bordering
-         * rectangle.
-         * theta is angle of rotation in degrees.
-         */
-        void rotate(float theta);
-        
-        /**
-         * Resets the picture to its initial state, bringing it to its
-         * initial location, scaling, and rotation.
-         */
+        //
+        // Resets the picture to its initial state, bringing it to its
+        // initial location, scaling, and rotation.
+        //
         void reset();
         
-        /* -------------------------- SERIALIZATION ------------------------- */
+        ///-------------------------- SERIALIZATION ------------------------- //
         
-        /**
-         * Serializes the Picture into a string with only the features that matter.
-         * imagePath, translation vector, scale vector, and rotation angle.
-         */
+        //
+        // Serializes the Picture into a string with only the features that matter.
+        // imagePath, translation vector, scale vector, and rotation angle.
+        //
         string toString();
         
-        /**
-         * Deserializes the Picture setting this picture object to its saved state.
-         */
+        //
+        // Deserializes the Picture setting this picture object to its saved state.
+        //
         void fromString(string contents);
-        /* -------------------------- SERIALIZATION ------------------------- */
+        ///-------------------------- SERIALIZATION ------------------------- //
     };
     
-    /**
-     * Makes a new Picture with the saved state.
-     */
+    //
+    // Makes a new Picture with the saved state.
+    //
     using namespace std;
     shared_ptr<Manipulator::Picture> restore_picture(string savedContents);
 }
-#endif /* Picture_hpp */
+#endif ///Picture_hpp //

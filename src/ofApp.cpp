@@ -5,8 +5,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    
     this->metaActionInProgress = false;
     ofSetBackgroundColor(0, 0, 0); // set the background to black!
+    
 }
 
 //--------------------------------------------------------------
@@ -15,7 +17,22 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    this->canvas.render(); // render the canvas
+
+    string fpsStr = "frame rate: " + ofToString(ofGetFrameRate(), 2);
+    
+    ofPushMatrix();
+        ofTranslate(ofGetWindowWidth() - fpsStr.size() * 10.0, ofGetWindowHeight() - 18);
+        ofSetColor(255, 255, 255);
+        ofDrawBitmapString(fpsStr, 0, 0);
+    ofPopMatrix();
+    
+    ofPushMatrix();
+        //        ofSetColor(255, 0, 128);
+        //        ofNoFill();
+        //        ofDrawCircle(this->f, 50.0);
+        this->canvas.render(); // render the canvas
+    ofPopMatrix();
+    
 }
 
 //--------------------------------------------------------------
@@ -79,57 +96,65 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
+    
     this->dragInProgress = true;
     
-    /* ---------------------------------------------- */
     auto currentPoint = ofPoint(x, y);
-    auto delta = currentPoint - this->theDragStarterPt;
+    this->dragDelta = currentPoint - this->theDragStarterPt;
     
-    /* ---------------translate the selected image on canvas --------------- */
-    this->canvas.translatePicture(delta.x, delta.y);
-    /* ---------------translate the selected image on canvas --------------- */
+    this->canvas.manipulatePicture(this->dragDelta);
     
     this->theDragStarterPt = currentPoint; // updating the dragStarter point
                                            // to the current position -- for the next motion segment!
-    /* ---------------------------------------------- */
 }
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+    
     this->theDragStarterPt = ofPoint(x, y); // drag is starting ------+++
+    
+    if(!this->dragInProgress) {
+        
+        // initiate the colorSelection render pass
+        this->canvas.beginSelectionRenderPass();
+    } else {
+        
+        this->canvas.endSelectionRenderPass();
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
+    
     if(this->dragInProgress) {
+        
         this->dragInProgress = false; // drag motion has ended
+        
+        this->canvas.endSelectionRenderPass();
+        
         return;
     }
-    this->canvas.selectPictureAt(x,y); // using the mouse pointer to select the pictures on the canvas
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
     
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+    this->canvas.selectPictureAt(x, y); // select the picture at the (x, y) point
     
+    this->canvas.endSelectionRenderPass();
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::mouseEntered(int x, int y) {}
+
+//--------------------------------------------------------------
+void ofApp::mouseExited(int x, int y) {}
+
+//--------------------------------------------------------------
+void ofApp::windowResized(int w, int h) {}
+
+//--------------------------------------------------------------
+void ofApp::gotMessage(ofMessage msg) {}
+
+//--------------------------------------------------------------
+void ofApp::dragEvent(ofDragInfo dragInfo) {
     
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
     std::for_each(dragInfo.files.begin(),
                   dragInfo.files.end(),
                   //

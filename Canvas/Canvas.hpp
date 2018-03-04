@@ -49,6 +49,12 @@ namespace Manipulator {
          */
         bool addPicture(std::string filePath, float tx, float ty);
         
+        //
+        // The selection render pass using the color selection method
+        //
+        void beginSelectionRenderPass();
+        void endSelectionRenderPass();
+        
         /**
          * Renders the canvas, drawing the pictures, one at a time in the order they were added to it.
          */
@@ -60,14 +66,13 @@ namespace Manipulator {
         bool saveCompositionToDisk(std::string fileName);
         
         /**
-         * Scales/resizes the current - selected picture or the picture on the foreground.
+         * Manipulates the Picture depending on the mode of its manipulator:
+         * - Scales/resizes the current - selected picture or the picture on the foreground.
+         * - 2D translation of the foregroundPic. Does nothing if there is no foregroundPic or no selected pic.
+         * - Computes the rotation by taking into account the delta w.r.t. the center of the
+         * border of the selected picture.
          */
-        void scalePicture(float sx, float sy);
-        
-        /**
-         * 2D translation of the foregroundPic. Does nothing if there is no foregroundPic or no selected pic.
-         */
-        void translatePicture(float tx, float ty);
+        void manipulatePicture(ofVec2f &delta);
         
         /**
          * Selects the picture on the foreground.

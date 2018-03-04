@@ -7,6 +7,7 @@
 
 #include "Picture.hpp"
 #include <sstream>
+#include <cmath>
 
 // ----------------------------------------------------------------------------
 //
@@ -16,93 +17,115 @@ Manipulator::Picture::Picture(string filePath, float tx, float ty) : Manipulator
     
     this->imagePath = filePath;
     this->selected  = false;
-    
+    this->isSelectionRenderPass = false;
+
     this->tMatrix.set(tx, ty);
-    this->sMatrix.set(1, 1);
+    this->sMatrix.set(1.0, 1.0);
     this->theta = 0.0;
     
-    this->manipulator = make_shared<PManipulator>();
-    
 }
 
-// ----------------------------------------------------------------------------
+// ------------
 //
-void Manipulator::Picture::render() {
+void Manipulator::Picture::transform() {
     
-    ofPushMatrix();
-    
-    ofSetColor(255, 255, 255, 255);
-    
-    ofTranslate(this->tMatrix.x, this->tMatrix.y);
-    ofRotate(this->theta);
-    ofScale(this->sMatrix.x, this->sMatrix.y);
-    
-    this->contents.draw(0,0);
-    
-    if(this->selected) {
-        
-        this->manipulator->show(this->contents.getWidth(),
-                                this->contents.getHeight());
-    } else {
-        
-        this->manipulator->hide(this->contents.getWidth(),
-                                this->contents.getHeight());
-    }
-    
-    ofPopMatrix();
+    this->renderMat.makeIdentityMatrix(); // restore to inital state and then apply the transformations
+
+    this->renderMat.scale(this->sMatrix);
+    this->renderMat.rotate(this->theta, 0, 0, 1); // same as ofRotate(degrees) -- rotate along the Z axis
+    this->renderMat.translate(this->tMatrix);
     
 }
 
-// ----------------------------------------------------------------------------
 //
-bool Manipulator::Picture::load() {
-    return this->contents.load(this->imagePath);
-}
-
-// ----------------------------------------------------------------------------
-//
-void Manipulator::Picture::drawBorder() {
-    this->selected = true;
-}
-
-// ----------------------------------------------------------------------------
-//
-void Manipulator::Picture::removeBorder() {
-    this->selected = false;
-}
-
-// ----------------------------------------------------------------------------
-//
-bool Manipulator::Picture::isSelected() { 
-    return this->selected;
-}
-
 // ----------------------------------------------------------------------------
 //
 using namespace std;
-bool Manipulator::Picture::containsPoint(int x, int y) {
-    
-    bool status = false;
+using namespace Manipulator;
+void Manipulator::Picture::render() {
 
+    this->transform(); // update to the latest transformation
+    
     ofPushMatrix();
     
-    ofTranslate(this->tMatrix.x, this->tMatrix.y);
-    ofRotate(this->theta);
-    ofScale(this->sMatrix.x, this->sMatrix.y);
+        ofMultMatrix(this->renderMat); // apply the render mat only for this shape
     
-    status = this->manipulator->canPictureBeSelected(x - this->tMatrix.x,
-                                                     y - this->tMatrix.y );
+        if (this->isSelectionRenderPass) {
+            
+            this->manipulator->renderSelectionPass();
+        } else {
+            
+            ofSetColor(255, 255, 255, 255);
+            this->contents.draw(0,0);
+            
+            if(this->selected) {
+                
+                this->manipulator->show(this->contents.getWidth(),
+                                        this->contents.getHeight());
+            } else {
+                
+                this->manipulator->hide(this->contents.getWidth(),
+                                        this->contents.getHeight());
+            }
+        }
     
     ofPopMatrix();
     
-    return status;
-    
 }
 
+//
 // ----------------------------------------------------------------------------
 //
-void Manipulator::Picture::translate(float tx, float ty) { 
-    this->tMatrix = this->tMatrix + ofVec2f(tx, ty);
+bool Manipulator::Picture::load() {
+    
+    bool loadStatus = false;
+    
+    loadStatus = this->contents.load(this->imagePath);
+    
+    if(!loadStatus) return loadStatus;
+    
+    this->manipulator = make_shared<PManipulator>(100, 100, this->contents.getWidth(), this->contents.getHeight());
+    this->manipulator->setRenderMat(&this->renderMat);
+    
+    return loadStatus;
+}
+
+//
+// ----------------------------------------------------------------------------
+//
+void Manipulator::Picture::drawBorder() {
+    
+    this->selected = true;
+}
+
+//
+// ----------------------------------------------------------------------------
+//
+void Manipulator::Picture::removeBorder() {
+    
+    this->selected = false;
+}
+
+//
+// ----------------------------------------------------------------------------
+//
+bool Manipulator::Picture::isSelected() {
+
+    return this->selected;
+}
+
+//
+// ----------------------------------------------------------------------------
+//
+using namespace std;
+bool Manipulator::Picture::containsPoint(float x, float y) {
+    
+    bool status = false;
+
+    status = this->manipulator->canPictureBeSelected(x, y);
+    
+    return status;
+    
 }
 
 // ----------------------------------------------------------------------------
@@ -146,6 +169,373 @@ string Manipulator::Picture::toString() {
     
     
     return contents;
+    
+}
+
+
+// ----------------------------------------------------------------------------
+//
+//
+// Utility function for finding the direction:
+// +,+ = a  | +, - = b
+// -,+ = c  | -, - = d
+char getDirection(float x, float y) {
+    if (x >= 0  &&  y >= 0)   return 'a'; // +ve, +ve
+    if (x >= 0  &&  y < 0)    return 'b'; // +ve, -ve
+    if (x < 0   &&  y >= 0)   return 'c'; // -ve, +ve
+    if (x < 0   &&  y < 0)    return 'd'; // -ve, ve
+    return '\0';
+}
+
+//
+// Shrinking utility function
+//
+void shrink(ofVec2f& s, float delta) {
+    s = delta >= 0 && delta < 1.0
+        ? s - delta
+        : s - (1.0 / delta);
+}
+
+//
+// Expanding utility function
+//
+void expand(ofVec2f& s, float delta) {
+    s = s + delta;
+}
+
+using namespace std;
+using namespace Manipulator;
+void Manipulator::Picture::processDelta(ofVec2f &delta) {
+    
+    auto manipulatorMode = this->manipulator->getMode();
+    
+    switch(manipulatorMode) {
+            
+        case T: {
+
+            //
+            // Translate
+            //
+            
+            this->tMatrix = this->tMatrix + delta;
+            
+            break;
+        }
+            
+        case S: {
+       
+            //
+            // Non-Uniform Scale
+            //
+            
+            float yScalingFactor = delta.length() / this->contents.getHeight();
+            float xScalingFactor = delta.length() / this->contents.getWidth();
+       
+            char hbindex = this->manipulator->getHitBoxIndex();
+            
+            switch (hbindex) {
+                
+                case 'b': {
+                    
+                    // top --y scale
+                    if (delta.y < 0) {
+                        
+                        // moved up
+                        // expand
+                        this->sMatrix.y = this->sMatrix.y + yScalingFactor;
+                    } else {
+                        // moved down
+                        // shrink
+                        this->sMatrix.y = yScalingFactor >= 0 && yScalingFactor < 1.0
+                            ? this->sMatrix.y - yScalingFactor
+                            : this->sMatrix.y - (1.0 / yScalingFactor);
+                    }
+                    
+                    break;
+                }
+                    
+                case 'd' : {
+                    
+                    // left -- x scale
+                    if (delta.x < 0) {
+                        
+                        // moved left
+                        // expand
+                        this->sMatrix.x = this->sMatrix.x + xScalingFactor;
+                    } else {
+                        
+                        // moved right
+                        // shrink
+                        this->sMatrix.x = xScalingFactor >= 0 && xScalingFactor < 1.0
+                            ? this->sMatrix.x - xScalingFactor
+                            : this->sMatrix.x - (1.0 / xScalingFactor);
+                    }
+                    
+                    break;
+                }
+                    
+                case 'f': {
+                    
+                    // right -- x scale
+                    if (delta.x >= 0) {
+                        
+                        // moved right
+                        // expand
+                        this->sMatrix.x = this->sMatrix.x + xScalingFactor;
+                    } else {
+                        
+                        // moved left
+                        // shrink
+                        this->sMatrix.x = xScalingFactor >= 0 && xScalingFactor < 1.0
+                            ? this->sMatrix.x - xScalingFactor
+                            : this->sMatrix.x - (1.0 / xScalingFactor);
+                    }
+                    
+                    break;
+                }
+                    
+                case 'h' : {
+                    
+                    // bottom -- y scale
+                    // top --y scale
+                    if (delta.y >= 0) {
+                        
+                        // moved down
+                        // expand
+                        this->sMatrix.y = this->sMatrix.y + yScalingFactor;
+                    } else {
+                        
+                        // moved up
+                        // shrink
+                        this->sMatrix.y = yScalingFactor >= 0 && yScalingFactor < 1.0
+                            ? this->sMatrix.y - yScalingFactor
+                            : this->sMatrix.y - (1.0 / yScalingFactor);
+                    }
+                    
+                    break;
+                }
+
+                default: {
+                    
+                    cout << "not for non-uniform scaling" << endl;
+                    break;
+                }
+            };
+            
+            break;
+        }
+            
+        case RS: {
+            
+            //
+            // Rotate and uniform scale
+            //
+            
+            //
+            // Uniform scaling happend along the diagonals
+            // so,
+            // D' = D + d, where D is the current diagonal length and d is the delta(magnitude)
+            // sf = D' : D = 1 + (d/D)
+            // sf ~ d/D
+            float scalingFactor = abs(delta.length() / sqrt(pow(this->contents.getWidth(), 2) + pow(this->contents.getHeight(), 2)));
+            
+            char hbindex = this->manipulator->getHitBoxIndex();
+            
+            switch (hbindex) {
+                    
+                case 'a': {
+                    
+                    // top left
+                    // +ve x and +ve y = negative scaling = shrinking
+                    // +ve x and -ve y = rotation clockwise
+                    // -ve x and +ve y = rotation anti-clockwise
+                    // -ve x and -ve y = positive scaling = expanding
+                    
+                    switch(getDirection(delta.x, delta.y)) {
+                            
+                        case 'a': {
+                            
+                            // shrink
+                            shrink(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                            
+                        case 'b': {
+                            
+                            // rotate clockwise
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                            
+                        case 'c': {
+                            
+                            // rotate anticlockwise
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                            
+                        case 'd': {
+                            
+                            // expand
+                            expand(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                    };
+                    
+                    break;
+                }
+                    
+                case 'c' : {
+
+                    // top right
+                    // +ve x and +ve y = rotation anti-clockwise
+                    // +ve x and -ve y = positive scaling = expanding
+                    // -ve x and +ve y = negative scaling = shrinking
+                    // -ve x and -ve y = rotation clockwise
+                    
+                    switch(getDirection(delta.x, delta.y)) {
+                            
+                        case 'a': {
+                            
+                            // rotate anti-clockwise
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                            
+                        case 'b': {
+                            
+                            // expand
+                            expand(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                            
+                        case 'c': {
+                            
+                            // shrink
+                            shrink(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                            
+                        case 'd': {
+                            
+                            // rotate clockwise
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                    };
+                    
+                    break;
+                }
+                    
+                case 'g': {
+
+                    // bottom left
+                    // +ve x and +ve y = rotation clockwise
+                    // +ve x and -ve y = negative scaling = shrinking
+                    // -ve x and +ve y = positive scaling = expanding
+                    // -ve x and -ve y = rotation anti-clockwise
+                    
+                    switch(getDirection(delta.x, delta.y)) {
+                            
+                        case 'a': {
+
+                            // clockwise rotate
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                            
+                        case 'b': {
+                            
+                            // shrink
+                            shrink(this->sMatrix, scalingFactor);
+                            break;
+                        }
+                            
+                        case 'c': {
+                            
+                            // expand
+                            expand(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                            
+                        case 'd': {
+
+                            // anticlockwise rotate
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                    };
+                    
+                    break;
+                }
+                    
+                case 'i': {
+                    
+                    // bottom right
+                    // +ve x and +ve y = positive scaling = expanding
+                    // +ve x and -ve y = rotation clockwise
+                    // -ve x and +ve y = rotation anti-clockwise
+                    // -ve x and -ve y = negative scaling = shrinking
+                    
+                    switch(getDirection(delta.x, delta.y)) {
+                            
+                        case 'a': {
+                            
+                            // expand
+                            expand(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                            
+                        case 'b': {
+                            
+                            // rotate clockwise
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                            
+                        case 'c': {
+                            
+                            // rotate anticlockwise
+                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            
+                            break;
+                        }
+                            
+                        case 'd': {
+                            
+                            // shrink
+                            shrink(this->sMatrix, scalingFactor);
+                            
+                            break;
+                        }
+                    };
+                    
+                    break;
+                }
+                    
+                default: {
+                    
+                    cout << "No manipulation possible at this moment" << endl;
+                    break;
+                }
+            };
+            
+            break;
+        }
+    };
     
 }
 

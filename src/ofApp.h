@@ -25,6 +25,11 @@ class ofApp : public ofBaseApp{
      * The exact point where the mouse button was pressed to start the drag.
      */
     ofPoint theDragStarterPt;
+    
+    //
+    // The delta vector for movement.
+    //
+    ofVec2f dragDelta;
 public:
     void setup();
     void update();
