@@ -46,6 +46,8 @@ void Manipulator::Picture::render() {
 
     this->transform(); // update to the latest transformation
     
+    // --------------
+    
     ofPushMatrix();
     
         ofMultMatrix(this->renderMat); // apply the render mat only for this shape
@@ -56,6 +58,7 @@ void Manipulator::Picture::render() {
         } else {
             
             ofSetColor(255, 255, 255, 255);
+            ofSetRectMode(OF_RECTMODE_CENTER); // center the image at the drop point?
             this->contents.draw(0,0);
             
             if(this->selected) {
@@ -69,6 +72,48 @@ void Manipulator::Picture::render() {
             }
         }
     
+    ofPopMatrix();
+
+    // --------------
+    
+    auto mode = this->manipulator->getMode();
+    string fpsStr; // mode print string
+    
+    switch(mode) {
+            
+        case T: {
+            
+            fpsStr = "Manipulator mode = Translate";
+            
+            break;
+        }
+            
+        case RS: {
+            
+            fpsStr = "Manipulator mode = Rotation + Uniform Scale";
+            
+            break;
+        }
+            
+        case S: {
+            
+            fpsStr = "Manipulator mode = Non-Uniform Scale";
+
+            break;
+        }
+            
+        default: {
+            
+            fpsStr = "";
+            
+            break;
+        }
+    };
+
+    ofPushMatrix();
+        ofTranslate(ofGetWindowWidth() - fpsStr.size() * 10.25, ofGetWindowHeight() - 32);
+        ofSetColor(255, 255, 255);
+        ofDrawBitmapString(fpsStr, 0, 0);
     ofPopMatrix();
     
 }
@@ -205,18 +250,24 @@ void expand(ofVec2f& s, float delta) {
 
 using namespace std;
 using namespace Manipulator;
-void Manipulator::Picture::processDelta(ofVec2f &delta) {
+void Manipulator::Picture::processDelta(const ofVec2f &src, const ofVec2f &dest) {
     
     auto manipulatorMode = this->manipulator->getMode();
     
     switch(manipulatorMode) {
+        
+        case N: {
+
+            // do nothing and bail
+            break;
+        }
             
         case T: {
 
             //
             // Translate
             //
-            
+            ofVec2f delta = dest - src;
             this->tMatrix = this->tMatrix + delta;
             
             break;
@@ -227,7 +278,7 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
             //
             // Non-Uniform Scale
             //
-            
+            ofVec2f delta = dest - src;
             float yScalingFactor = delta.length() / this->contents.getHeight();
             float xScalingFactor = delta.length() / this->contents.getWidth();
        
@@ -239,11 +290,12 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                     
                     // top --y scale
                     if (delta.y < 0) {
-                        
+
                         // moved up
                         // expand
                         this->sMatrix.y = this->sMatrix.y + yScalingFactor;
                     } else {
+
                         // moved down
                         // shrink
                         this->sMatrix.y = yScalingFactor >= 0 && yScalingFactor < 1.0
@@ -337,19 +389,23 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
             // D' = D + d, where D is the current diagonal length and d is the delta(magnitude)
             // sf = D' : D = 1 + (d/D)
             // sf ~ d/D
+            ofVec2f delta = dest - src;
             float scalingFactor = abs(delta.length() / sqrt(pow(this->contents.getWidth(), 2) + pow(this->contents.getHeight(), 2)));
             
             char hbindex = this->manipulator->getHitBoxIndex();
+            
+            cout << "hbindex = " << hbindex << endl;
+            cout << "delta = " << delta << endl;
             
             switch (hbindex) {
                     
                 case 'a': {
                     
                     // top left
-                    // +ve x and +ve y = negative scaling = shrinking
+                    // +ve x and +ve y = positive scaling = expanding
                     // +ve x and -ve y = rotation clockwise
                     // -ve x and +ve y = rotation anti-clockwise
-                    // -ve x and -ve y = positive scaling = expanding
+                    // -ve x and -ve y = negative scaling = shrinking
                     
                     switch(getDirection(delta.x, delta.y)) {
                             
@@ -364,7 +420,7 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                         case 'b': {
                             
                             // rotate clockwise
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            this->theta = this->theta + delta.length() * 0.1;
                             
                             break;
                         }
@@ -372,7 +428,7 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                         case 'c': {
                             
                             // rotate anticlockwise
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            this->theta = this->theta - delta.length() * 0.1;
                             
                             break;
                         }
@@ -392,17 +448,17 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                 case 'c' : {
 
                     // top right
-                    // +ve x and +ve y = rotation anti-clockwise
+                    // +ve x and +ve y = rotation clockwise
                     // +ve x and -ve y = positive scaling = expanding
                     // -ve x and +ve y = negative scaling = shrinking
-                    // -ve x and -ve y = rotation clockwise
+                    // -ve x and -ve y = rotation anti-clockwise
                     
                     switch(getDirection(delta.x, delta.y)) {
                             
                         case 'a': {
                             
-                            // rotate anti-clockwise
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            // rotate clockwise
+                            this->theta = this->theta + delta.length() * 0.1;
                             
                             break;
                         }
@@ -425,8 +481,8 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                             
                         case 'd': {
                             
-                            // rotate clockwise
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            // rotate anti-clockwise
+                            this->theta = this->theta - delta.length() * 0.1;
                             
                             break;
                         }
@@ -438,17 +494,17 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                 case 'g': {
 
                     // bottom left
-                    // +ve x and +ve y = rotation clockwise
+                    // +ve x and +ve y = rotation anti-clockwise
                     // +ve x and -ve y = negative scaling = shrinking
                     // -ve x and +ve y = positive scaling = expanding
-                    // -ve x and -ve y = rotation anti-clockwise
+                    // -ve x and -ve y = rotation clockwise
                     
                     switch(getDirection(delta.x, delta.y)) {
                             
                         case 'a': {
 
-                            // clockwise rotate
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            // anticlockwise rotate
+                            this->theta = this->theta - delta.length() * 0.1;
                             
                             break;
                         }
@@ -470,8 +526,8 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                             
                         case 'd': {
 
-                            // anticlockwise rotate
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            // clockwise rotate
+                            this->theta = this->theta + delta.length() * 0.1;
                             
                             break;
                         }
@@ -484,8 +540,8 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                     
                     // bottom right
                     // +ve x and +ve y = positive scaling = expanding
-                    // +ve x and -ve y = rotation clockwise
-                    // -ve x and +ve y = rotation anti-clockwise
+                    // +ve x and -ve y = rotation anti-clockwise
+                    // -ve x and +ve y = rotation clockwise
                     // -ve x and -ve y = negative scaling = shrinking
                     
                     switch(getDirection(delta.x, delta.y)) {
@@ -500,16 +556,16 @@ void Manipulator::Picture::processDelta(ofVec2f &delta) {
                             
                         case 'b': {
                             
-                            // rotate clockwise
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            // rotate anticlockwise
+                            this->theta = this->theta - delta.length() * 0.1;
                             
                             break;
                         }
                             
                         case 'c': {
                             
-                            // rotate anticlockwise
-                            this->theta = fmod(this->theta + 0.1 * this->manipulator->getBorderCenter().angle(delta), 360.0);
+                            // rotate clockwise
+                            this->theta = this->theta + delta.length() * 0.1;
                             
                             break;
                         }
@@ -573,7 +629,36 @@ shared_ptr<Manipulator::Picture> Manipulator::restore_picture(string savedConten
     
 }
 
+//
+// ----- CONSTRAINED TRS --------------------------------- //
+//
+using namespace Manipulator;
+void Manipulator::Picture::translateConstrained(bool isOnX, bool isPositive) {
+    
+    if (isOnX) {
+        
+        this->tMatrix.x = isPositive ? this->tMatrix.x + 25 : this->tMatrix.x - 25;
+    } else {
+        
+        this->tMatrix.y = isPositive ? this->tMatrix.y + 25 : this->tMatrix.y - 25;
+    }
+}
 
+using namespace Manipulator;
+void Manipulator::Picture::scaleConstrained(bool isPositive) {
+    
+    this->sMatrix = isPositive ? this->sMatrix + 0.25 : this->sMatrix - 0.25;
+}
+
+using namespace Manipulator;
+void  Manipulator::Picture::rotateConstrained(bool isPositive) {
+    
+    this->theta = isPositive ? this->theta + 15.0 : this->theta - 15.0;
+}
+
+//
+// ----- CONSTRAINED TRS --------------------------------- //
+//
 
 
 

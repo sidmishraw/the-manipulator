@@ -292,18 +292,56 @@ void Manipulator::Canvas::loadStateFromDisk(std::string fileName) {
 //
 // ----------------------------------------------------------------------------------------------------
 //
-void Manipulator::Canvas::manipulatePicture(ofVec2f &delta) {
+void Manipulator::Canvas::manipulatePicture(const ofVec2f &src, const ofVec2f &dest) {
     
     if (this->foregroundPic.get() == nullptr) {
         
         return; // no picture has been selected, so cannot translate :D
     }
     
-    this->foregroundPic->processDelta(delta);
+    this->foregroundPic->processDelta(src, dest);
     
 }
 
+//
+// ----------------------------------------------------------------------------------------------------
+//
+using namespace std;
+using namespace Manipulator;
 void Manipulator::Canvas::deletePicture() {
+    
+    cout << "Current depth = " << this->currentDepth << endl;
+    
+    //
+    // Simple picture deletion logic ------
+    // I cycle the selected picture to the foreground and delete it -- fatality!
+    //
+    if(this->foregroundPic.get() != nullptr) {
+        
+        //
+        // loop it till the selected picture reaches the foreground -- least currentDepth
+        //
+        while ( !((this->selectionDepth - 1) < this->currentDepth) ) {
+        
+            cout << "at selection depth = " << this->selectionDepth << endl;
+            
+            auto temp = this->pictures[this->selectionDepth - 1]; // swap with the picture just above it
+            this->pictures[this->selectionDepth - 1] = this->foregroundPic;
+            this->pictures[this->selectionDepth] = temp;
+            
+            this->selectionDepth = this->selectionDepth - 1;
+        }
+
+        cout << "selection depth final = " << this->selectionDepth << endl;
+
+        //
+        // here, the selection depth will be equal to the current depth -- the selected
+        // picture has become the foreground picture. Time to give it the fatality!
+        //
+        this->pictures.erase(this->currentDepth);
+        this->currentDepth = this->currentDepth + 1; // since the nbr of pictures just decreased!, the depth will increase --> towards 0
+
+    }
     
     return;
 }
@@ -355,6 +393,53 @@ void Canvas::endSelectionRenderPass() {
     
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     
+}
+
+//
+// ---------------------------------------------------------------------------------------------------
+//
+
+
+//
+// ----------------------------------------------------------------
+//
+using namespace std;
+using namespace Manipulator;
+void Canvas::processConstrained(char flag, bool isPositive) {
+    
+    if (this->foregroundPic.get() == nullptr) return;
+    
+    switch(flag) {
+            
+        case 's': {
+            
+            this->foregroundPic->scaleConstrained(isPositive);
+            
+            return;
+        }
+            
+        case 'r': {
+            
+            this->foregroundPic->rotateConstrained(isPositive);
+            
+            return;
+        }
+            
+        case 'x': {
+            
+            this->foregroundPic->translateConstrained(true, isPositive);
+            
+            return;
+        }
+            
+        case 'y': {
+            
+            this->foregroundPic->translateConstrained(false, isPositive);
+            
+            return;
+        }
+    };
+
 }
 
 

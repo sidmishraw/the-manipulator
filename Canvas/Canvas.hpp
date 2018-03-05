@@ -28,13 +28,19 @@ namespace Manipulator {
          */
         std::map<int,std::shared_ptr<Manipulator::Picture>> pictures;
         
+        //
         // denotes the z-depth?
+        //
         int currentDepth;
         
+        //
         // pointer to the foreground picture.
+        //
         std::shared_ptr<Manipulator::Picture> foregroundPic;
         
+        //
         // the depth of the selected picture
+        //
         int selectionDepth;
         
     public:
@@ -72,7 +78,7 @@ namespace Manipulator {
          * - Computes the rotation by taking into account the delta w.r.t. the center of the
          * border of the selected picture.
          */
-        void manipulatePicture(ofVec2f &delta);
+        void manipulatePicture(const ofVec2f &src, const ofVec2f &dest);
         
         /**
          * Selects the picture on the foreground.
@@ -103,6 +109,13 @@ namespace Manipulator {
          * Deletes the selected picture from the canvas.
          */
         void deletePicture();
+        
+        // Processing for constrained TRS of selected image
+        // s -- scale
+        // x -- x translate
+        // y -- y translate
+        // r -- rotate
+        void processConstrained(char flag, bool isPositive);
         
         /* ------------------------------------------------------------ */
         

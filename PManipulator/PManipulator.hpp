@@ -21,7 +21,7 @@ namespace Manipulator {
     // Translate
     // Non Uniform Scale
     enum ManipulatorMode {
-        RS, T, S
+        RS, T, S, N
     };
     
     // Self Note -----

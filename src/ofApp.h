@@ -47,4 +47,9 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     
+    bool rotateConstrained;
+    bool xTranslateConstrained;
+    bool yTranslateConstrained;
+    bool scaleConstrained;
+    
 };

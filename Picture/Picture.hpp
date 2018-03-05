@@ -116,7 +116,7 @@ namespace Manipulator {
         // Processes the delta, manipulating itself depending on the mode of
         // the manipulator!
         //
-        void processDelta(ofVec2f &delta);
+        void processDelta(const ofVec2f &src, const ofVec2f &dest);
         
         //
         // Resets the picture to its initial state, bringing it to its
@@ -137,6 +137,21 @@ namespace Manipulator {
         //
         void fromString(string contents);
         ///-------------------------- SERIALIZATION ------------------------- //
+        
+        //
+        // ----- CONSTRAINED TRS --------------------------------- //
+        //
+        // Translate 25 px -- increments
+        // Scale - 0.25 --- increments - uniform
+        // rotate - 15 degrees -- uniform
+        //
+        void translateConstrained(bool isOnX, bool isPositive);
+        void scaleConstrained(bool isPositive);
+        void rotateConstrained(bool isPositive);
+        
+        //
+        // ----- CONSTRAINED TRS --------------------------------- //
+        //
     };
     
     //
